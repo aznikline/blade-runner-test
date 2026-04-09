@@ -1147,122 +1147,205 @@
     </div>
 
     <script>
-        // Extended Question Bank - 22 Questions
+        // Extended Question Bank - 26 Questions
+        // Based on the original Blade Runner VK Test + Baseline Test
         const questions = [
-            // Section A: Classic VK Test (Empathy Questions)
+            // Section A: Classic VK Test (10 questions - based on movie)
             {
                 type: "VK TEST",
-                text: "Describe in single words only the good things that come into your mind about your mother.",
-                category: "emotional_memory"
+                section: "A",
+                text: "It's your birthday. Someone gives you a calfskin wallet. How do you react?",
+                category: "moral_response",
+                note: "Original VK Test question from the film"
             },
             {
                 type: "VK TEST",
-                text: "You have a little boy. He shows you his butterfly collection plus the killing jar. What do you say?",
-                category: "emotional_response"
+                section: "A",
+                text: "You've got a little boy. He shows you his butterfly collection plus the killing jar. What do you say?",
+                category: "protective_instinct",
+                note: "Classic VK Test question"
             },
             {
                 type: "VK TEST",
-                text: "A middle-aged man has an眼角 come to rest. It's a very painful thing to watch. What do you do?",
-                category: "empathy_action"
+                section: "A",
+                text: "You're watching television. Suddenly you realize there's a wasp crawling on your arm. What do you do?",
+                category: "instinctive_reaction",
+                note: "Film question - measures startle response"
             },
             {
                 type: "VK TEST",
-                text: "You're watching a stage play. A beautiful woman comes out and starts to cry. What is the cause?",
-                category: "emotional_reasoning"
+                section: "A",
+                text: "You're reading a magazine. You come across a full-page nude photo of a girl. What's your reaction?",
+                category: "emotional_response",
+                note: "Film question - tests shame/embarrassment response"
             },
             {
                 type: "VK TEST",
-                text: "A desert. Beautiful, empty. You're very thirsty. You find a bottle of water. What do you do?",
-                category: "ethical_decision"
+                section: "A",
+                text: "You show that photo to your husband. He likes it so much he hangs it on your bedroom wall. How do you feel?",
+                category: "jealousy_ownership",
+                note: "Film question - emotional possessiveness"
             },
             {
                 type: "VK TEST",
-                text: "Your best friend is dying. He's in terrible pain. You could end it quickly. What do you do?",
-                category: "moral_dilemma"
+                section: "A",
+                text: "There's a show on television about a man with a wooden leg. What do you do?",
+                category: "empathy_curiosity",
+                note: "Film question - measures natural curiosity/empathy"
             },
             {
                 type: "VK TEST",
-                text: "An envelope falls through your mail slot. Inside is a photo of someone you love. What do you feel?",
-                category: "emotional_response"
+                section: "A",
+                text: "You've had this favorite toy since childhood. You just found out it was accidentally thrown away. How do you feel?",
+                category: "loss_attachment",
+                note: "Emotional attachment to objects/memories"
             },
-            // Section B: Baseline Test (Emotional Trigger Words)
+            {
+                type: "VK TEST",
+                section: "A",
+                text: "As a child, you dreamed of becoming an astronaut and going to the moon. Do you still remember that dream?",
+                category: "nostalgia_memory",
+                note: "Tests childhood memory and nostalgia"
+            },
+            {
+                type: "VK TEST",
+                section: "A",
+                text: "You're watching a stage play. A banquet is in progress. The guests are enjoying raw oysters. The main course is boiled dog. How do you react?",
+                category: "cultural_morality",
+                note: "Film question - moral boundaries around food/culture"
+            },
+            {
+                type: "VK TEST",
+                section: "A",
+                text: "You're on a train. An elderly person sits next to you and starts talking about losing their spouse of 50 years. What do you do?",
+                category: "empathy_action",
+                note: "Natural empathic response to grief"
+            },
+            
+            // Section B: Baseline Test (6 questions - emotional triggers)
             {
                 type: "BASELINE",
-                text: "A woman at a diner starts crying quietly into her coffee. Do you approach her?",
-                category: "social_response"
-            },
-            {
-                type: "BASELINE",
-                text: "You find a wallet with $1000 inside, no identification. What do you do?",
-                category: "moral_action"
-            },
-            {
-                type: "BASELINE",
-                text: "A child is lost and crying in a store. No parents in sight. What do you do?",
-                category: "protective_instinct"
-            },
-            {
-                type: "BASELINE",
-                text: "You witness someone being bullied. No one else intervenes. What do you do?",
-                category: "courage_ethics"
-            },
-            {
-                type: "BASELINE",
-                text: "Your partner says 'I'm fine' but clearly isn't. How do you respond?",
-                category: "emotional_perception"
-            },
-            // Section C: Deep Empathy Questions
-            {
-                type: "VK TEST",
-                text: "Your mother made your least favorite dish. She's proud of it and watching you expectantly. What do you do?",
-                category: "social_honesty"
-            },
-            {
-                type: "VK TEST",
-                text: "You see a bird with a broken wing. It's suffering. What would you do?",
-                category: "compassion_action"
-            },
-            {
-                type: "VK TEST",
-                text: "Describe a moment when you felt truly understood by another person.",
-                category: "emotional_memory"
-            },
-            {
-                type: "VK TEST",
-                text: "The person you暗恋 has just gotten engaged to someone else. What do you feel?",
-                category: "emotional_honesty"
-            },
-            // Section D: Self-Reflection Questions
-            {
-                type: "BASELINE",
-                text: "When was the last time you cried? What triggered it?",
-                category: "emotional_awareness"
+                section: "B",
+                text: "When you hear the word 'mother', what comes to mind? What does it mean to you?",
+                category: "core_memory",
+                trigger: "mother",
+                note: "Baseline trigger - core emotional memory"
             },
             {
                 type: "BASELINE",
-                text: "If you could erase one painful memory, would you? Why or why not?",
-                category: "identity_attachment"
+                section: "B",
+                text: "What images come to mind when you hear the word 'war'?",
+                category: "trauma_fear",
+                trigger: "war",
+                note: "Baseline trigger - fear/trauma associations"
             },
             {
                 type: "BASELINE",
-                text: "A stranger on the street tells you they haven't eaten in days. You have $10. What do you do?",
-                category: "empathy_action"
+                section: "B",
+                text: "What does the word 'family' mean to you?",
+                category: "belonging_responsibility",
+                trigger: "family",
+                note: "Baseline trigger - identity and belonging"
             },
             {
                 type: "BASELINE",
-                text: "You're told a colleague is spreading false rumors about you. How do you react?",
-                category: "emotional_management"
-            },
-            // Section E: Final Assessment
-            {
-                type: "VK TEST",
-                text: "Use one word to describe how you feel about the concept of 'home'.",
-                category: "core_identity"
+                section: "B",
+                text: "When did you first realize that all living things eventually die? How did it feel?",
+                category: "mortality_awareness",
+                trigger: "death",
+                note: "Baseline trigger - consciousness of mortality"
             },
             {
+                type: "BASELINE",
+                section: "B",
+                text: "Can you remember a time when you felt truly loved? Describe that moment.",
+                category: "emotional_memory",
+                trigger: "love",
+                note: "Baseline trigger - love and emotional warmth"
+            },
+            {
+                type: "BASELINE",
+                section: "B",
+                text: "What are you afraid of? Describe a moment when you felt real fear.",
+                category: "fear_self",
+                trigger: "fear",
+                note: "Baseline trigger - personal fear and vulnerability"
+            },
+            
+            // Section C: Deep Empathy (4 questions - complex emotional reasoning)
+            {
                 type: "VK TEST",
-                text: "If you could go back and change one moment in your life, what would it be and why?",
-                category: "regret_attachment"
+                section: "C",
+                text: "You're sorting through a deceased relative's belongings and find a letter they never sent. It's full of love and regret. What do you do?",
+                category: "empathy_grief",
+                note: "Tests empathic response to others' unexpressed emotions"
+            },
+            {
+                type: "VK TEST",
+                section: "C",
+                text: "You're shipwrecked with one other person. There's only enough food for one to survive until rescue. How do you decide?",
+                category: "moral_dilemma",
+                note: "Survival instinct vs. moral compass"
+            },
+            {
+                type: "VK TEST",
+                section: "C",
+                text: "You made a significant promise to someone important, but couldn't keep it due to circumstances beyond your control. How do you feel about it now?",
+                category: "guilt_self-reflection",
+                note: "Tests self-reflection and guilt processing"
+            },
+            {
+                type: "VK TEST",
+                section: "C",
+                text: "Someone deeply hurt you years ago. Now they come back, genuinely apologetic, asking for forgiveness. What do you do?",
+                category: "forgiveness_release",
+                note: "Tests capacity for emotional release and forgiveness"
+            },
+            
+            // Section D: Self-Reflection (4 questions - emotional self-awareness)
+            {
+                type: "BASELINE",
+                section: "D",
+                text: "Describe your happiest memory. Why is it so special to you?",
+                category: "emotional_self-awareness",
+                note: "Tests authentic emotional memory recall"
+            },
+            {
+                type: "BASELINE",
+                section: "D",
+                text: "What's the most painful experience you've been through? How did you cope with it?",
+                category: "pain_processing",
+                note: "Tests emotional processing of trauma"
+            },
+            {
+                type: "BASELINE",
+                section: "D",
+                text: "If you could go back and change one thing from your past, what would it be and why?",
+                category: "regret_identity",
+                note: "Tests emotional attachment to past"
+            },
+            {
+                type: "BASELINE",
+                section: "D",
+                text: "What future scenario scares you the most? Imagine it and describe your feelings.",
+                category: "future_fear",
+                note: "Tests emotional projection to future"
+            },
+            
+            // Section E: Final Assessment (2 questions - core identity)
+            {
+                type: "VK TEST",
+                section: "E",
+                text: "Who are you? Not your name or profession - but who are you at your core?",
+                category: "self_identity",
+                note: "Ultimate question - tests self-identity and consciousness"
+            },
+            {
+                type: "VK TEST",
+                section: "E",
+                text: "How would you prove that you are human and not a replicant?",
+                category: "humanity_proof",
+                note: "Final test - what makes you human?"
             }
         ];
 
