@@ -972,6 +972,76 @@
             80% { transform: translate(-1px, 1px); }
         }
 
+        /* Language Switcher */
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(18, 18, 26, 0.9);
+            border: 1px solid var(--dark-border);
+            border-radius: 20px;
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lang-switch:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .lang-switch .flag {
+            font-size: 1rem;
+        }
+
+        .lang-switch .lang-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch.active .lang-text {
+            color: var(--neon-cyan);
+        }
+
+        /* Voice Error Toast */
+        .voice-error-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 12px 24px;
+            background: rgba(255, 51, 102, 0.9);
+            border: 1px solid var(--neon-pink);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .voice-error-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .voice-error-toast.info {
+            background: rgba(0, 240, 255, 0.9);
+            border-color: var(--neon-cyan);
+        }
+
+        /* Voice Unavailable State */
+        .voice-unavailable .speak-btn {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
         /* Responsive */
         @media (max-width: 600px) {
             .logo { font-size: 1.5rem; letter-spacing: 3px; }
@@ -985,6 +1055,11 @@
                 padding: 8px 12px;
                 font-size: 0.65rem;
             }
+            .lang-switch {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
@@ -993,11 +1068,20 @@
     <div class="scanline"></div>
     <div class="crt-overlay"></div>
 
+    <!-- Language Switcher -->
+    <div class="lang-switch" id="langSwitch" onclick="toggleLanguage()">
+        <span class="flag" id="langFlag">🇺🇸</span>
+        <span class="lang-text" id="langText">EN</span>
+    </div>
+
     <!-- Voice Status Indicator -->
     <div class="voice-status" id="voiceStatus">
         <div class="mic-icon"></div>
         <span id="voiceStatusText">Voice Ready</span>
     </div>
+
+    <!-- Voice Error Toast -->
+    <div class="voice-error-toast" id="voiceErrorToast"></div>
 
     <div class="container">
         <header class="header">
@@ -1147,14 +1231,17 @@
     </div>
 
     <script>
-        // Extended Question Bank - 26 Questions
-        // Based on the original Blade Runner VK Test + Baseline Test
+        // Current language state
+        let currentLang = 'en';
+
+        // Extended Question Bank - 26 Questions with Chinese Translation
         const questions = [
             // Section A: Classic VK Test (10 questions - based on movie)
             {
                 type: "VK TEST",
                 section: "A",
                 text: "It's your birthday. Someone gives you a calfskin wallet. How do you react?",
+                textCn: "你生日那天，有人送了你一个小牛皮钱包。你会怎么做？",
                 category: "moral_response",
                 note: "Original VK Test question from the film"
             },
@@ -1162,6 +1249,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You've got a little boy. He shows you his butterfly collection plus the killing jar. What do you say?",
+                textCn: "你有一个小男孩，他向你展示他的蝴蝶收藏，还有毒瓶（杀死蝴蝶用的）。你会怎么说？",
                 category: "protective_instinct",
                 note: "Classic VK Test question"
             },
@@ -1169,6 +1257,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You're watching television. Suddenly you realize there's a wasp crawling on your arm. What do you do?",
+                textCn: "你正在看电视，突然意识到有一只黄蜂在你手臂上爬。你会怎么做？",
                 category: "instinctive_reaction",
                 note: "Film question - measures startle response"
             },
@@ -1176,6 +1265,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You're reading a magazine. You come across a full-page nude photo of a girl. What's your reaction?",
+                textCn: "你正在看杂志，看到一整页裸体女性照片。你的反应是什么？",
                 category: "emotional_response",
                 note: "Film question - tests shame/embarrassment response"
             },
@@ -1183,6 +1273,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You show that photo to your husband. He likes it so much he hangs it on your bedroom wall. How do you feel?",
+                textCn: "你把那张照片给你丈夫看。他非常喜欢，把它挂在卧室墙上。你什么感受？",
                 category: "jealousy_ownership",
                 note: "Film question - emotional possessiveness"
             },
@@ -1190,6 +1281,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "There's a show on television about a man with a wooden leg. What do you do?",
+                textCn: "电视上有一个节目，讲的是一个失去腿的男人。你会怎么做？",
                 category: "empathy_curiosity",
                 note: "Film question - measures natural curiosity/empathy"
             },
@@ -1197,6 +1289,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You've had this favorite toy since childhood. You just found out it was accidentally thrown away. How do you feel?",
+                textCn: "你有一个从小就很喜欢的玩具。你刚刚发现它被意外扔掉了。你什么感受？",
                 category: "loss_attachment",
                 note: "Emotional attachment to objects/memories"
             },
@@ -1204,6 +1297,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "As a child, you dreamed of becoming an astronaut and going to the moon. Do you still remember that dream?",
+                textCn: "小时候你梦想成为宇航员，去月球。你还记得那个梦想吗？",
                 category: "nostalgia_memory",
                 note: "Tests childhood memory and nostalgia"
             },
@@ -1211,6 +1305,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You're watching a stage play. A banquet is in progress. The guests are enjoying raw oysters. The main course is boiled dog. How do you react?",
+                textCn: "你正在看一出舞台剧。宴会正在进行，客人们享用作开胃菜的生蚝。主菜是煮熟的狗肉。你怎么反应？",
                 category: "cultural_morality",
                 note: "Film question - moral boundaries around food/culture"
             },
@@ -1218,6 +1313,7 @@
                 type: "VK TEST",
                 section: "A",
                 text: "You're on a train. An elderly person sits next to you and starts talking about losing their spouse of 50 years. What do you do?",
+                textCn: "你坐火车旅行。一个老人坐在你旁边，开始讲述他失去了相伴50年的妻子。你会怎么做？",
                 category: "empathy_action",
                 note: "Natural empathic response to grief"
             },
@@ -1227,6 +1323,7 @@
                 type: "BASELINE",
                 section: "B",
                 text: "When you hear the word 'mother', what comes to mind? What does it mean to you?",
+                textCn: "当你听到'母亲'这个词时，你脑海中浮现什么？它对你意味着什么？",
                 category: "core_memory",
                 trigger: "mother",
                 note: "Baseline trigger - core emotional memory"
@@ -1235,6 +1332,7 @@
                 type: "BASELINE",
                 section: "B",
                 text: "What images come to mind when you hear the word 'war'?",
+                textCn: "当你听到'战争'这个词时，脑海中会浮现什么画面？",
                 category: "trauma_fear",
                 trigger: "war",
                 note: "Baseline trigger - fear/trauma associations"
@@ -1243,6 +1341,7 @@
                 type: "BASELINE",
                 section: "B",
                 text: "What does the word 'family' mean to you?",
+                textCn: "'家庭'这个词对你意味着什么？",
                 category: "belonging_responsibility",
                 trigger: "family",
                 note: "Baseline trigger - identity and belonging"
@@ -1251,6 +1350,7 @@
                 type: "BASELINE",
                 section: "B",
                 text: "When did you first realize that all living things eventually die? How did it feel?",
+                textCn: "你第一次意识到所有生物都会死是什么时候？当时感觉如何？",
                 category: "mortality_awareness",
                 trigger: "death",
                 note: "Baseline trigger - consciousness of mortality"
@@ -1259,6 +1359,7 @@
                 type: "BASELINE",
                 section: "B",
                 text: "Can you remember a time when you felt truly loved? Describe that moment.",
+                textCn: "你能回忆起一次真正感受到被爱的时刻吗？描述一下。",
                 category: "emotional_memory",
                 trigger: "love",
                 note: "Baseline trigger - love and emotional warmth"
@@ -1267,6 +1368,7 @@
                 type: "BASELINE",
                 section: "B",
                 text: "What are you afraid of? Describe a moment when you felt real fear.",
+                textCn: "你害怕什么？描述一下你感到真正恐惧的那一刻。",
                 category: "fear_self",
                 trigger: "fear",
                 note: "Baseline trigger - personal fear and vulnerability"
@@ -1277,6 +1379,7 @@
                 type: "VK TEST",
                 section: "C",
                 text: "You're sorting through a deceased relative's belongings and find a letter they never sent. It's full of love and regret. What do you do?",
+                textCn: "你在整理已故亲人的遗物，发现一封他们从未寄出的信，充满了爱和遗憾。你会怎么做？",
                 category: "empathy_grief",
                 note: "Tests empathic response to others' unexpressed emotions"
             },
@@ -1284,6 +1387,7 @@
                 type: "VK TEST",
                 section: "C",
                 text: "You're shipwrecked with one other person. There's only enough food for one to survive until rescue. How do you decide?",
+                textCn: "你和其他人遭遇船难，只够一个人的食物撑到获救。你怎么决定？",
                 category: "moral_dilemma",
                 note: "Survival instinct vs. moral compass"
             },
@@ -1291,6 +1395,7 @@
                 type: "VK TEST",
                 section: "C",
                 text: "You made a significant promise to someone important, but couldn't keep it due to circumstances beyond your control. How do you feel about it now?",
+                textCn: "你对一个重要的人许下重要承诺，但因无法控制的 circumstances 没能兑现。你现在怎么看待这件事？",
                 category: "guilt_self-reflection",
                 note: "Tests self-reflection and guilt processing"
             },
@@ -1298,6 +1403,7 @@
                 type: "VK TEST",
                 section: "C",
                 text: "Someone deeply hurt you years ago. Now they come back, genuinely apologetic, asking for forgiveness. What do you do?",
+                textCn: "多年前有人严重伤害过你。现在他们回来了，真诚道歉，请求原谅。你会怎么做？",
                 category: "forgiveness_release",
                 note: "Tests capacity for emotional release and forgiveness"
             },
@@ -1307,6 +1413,7 @@
                 type: "BASELINE",
                 section: "D",
                 text: "Describe your happiest memory. Why is it so special to you?",
+                textCn: "描述你最快乐的记忆。为什么它对你如此特别？",
                 category: "emotional_self-awareness",
                 note: "Tests authentic emotional memory recall"
             },
@@ -1314,6 +1421,7 @@
                 type: "BASELINE",
                 section: "D",
                 text: "What's the most painful experience you've been through? How did you cope with it?",
+                textCn: "你经历过的最痛苦的事是什么？你是如何度过的？",
                 category: "pain_processing",
                 note: "Tests emotional processing of trauma"
             },
@@ -1321,6 +1429,7 @@
                 type: "BASELINE",
                 section: "D",
                 text: "If you could go back and change one thing from your past, what would it be and why?",
+                textCn: "如果可以回到过去改变一件事，你会选择什么？为什么？",
                 category: "regret_identity",
                 note: "Tests emotional attachment to past"
             },
@@ -1328,6 +1437,7 @@
                 type: "BASELINE",
                 section: "D",
                 text: "What future scenario scares you the most? Imagine it and describe your feelings.",
+                textCn: "你最害怕的未来场景是什么？想象它并描述你的感受。",
                 category: "future_fear",
                 note: "Tests emotional projection to future"
             },
@@ -1337,6 +1447,7 @@
                 type: "VK TEST",
                 section: "E",
                 text: "Who are you? Not your name or profession - but who are you at your core?",
+                textCn: "你是谁？不是你的名字或职业——而是你本质是什么？",
                 category: "self_identity",
                 note: "Ultimate question - tests self-identity and consciousness"
             },
@@ -1344,6 +1455,7 @@
                 type: "VK TEST",
                 section: "E",
                 text: "How would you prove that you are human and not a replicant?",
+                textCn: "你如何证明自己是人类而不是复制人？",
                 category: "humanity_proof",
                 note: "Final test - what makes you human?"
             }
@@ -1356,6 +1468,9 @@
         let recognition = null;
         let isListening = false;
         let currentUtterance = null;
+        let voiceAvailable = true;
+        let speechAvailable = true;
+        let recognitionAvailable = true;
 
         // DOM Elements
         const voiceStatus = document.getElementById('voiceStatus');
@@ -1365,12 +1480,52 @@
         const answerDisplay = document.getElementById('answerDisplay');
         const answerText = document.getElementById('answerText');
         const answerInput = document.getElementById('answerInput');
+        const voiceErrorToast = document.getElementById('voiceErrorToast');
+
+        // Language Labels
+        const langLabels = {
+            en: { flag: '🇺🇸', text: 'EN' },
+            cn: { flag: '🇨🇳', text: '中文' }
+        };
+
+        // Toggle Language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'cn' : 'en';
+            document.getElementById('langFlag').textContent = langLabels[currentLang].flag;
+            document.getElementById('langText').textContent = langLabels[currentLang].text;
+            document.getElementById('langSwitch').classList.toggle('active', currentLang === 'cn');
+            
+            // Update question display
+            loadQuestion();
+            
+            // Show toast
+            showToast(currentLang === 'cn' ? '语言已切换为中文' : 'Language switched to English', 'info');
+        }
+
+        // Show Toast Message
+        function showToast(message, type = 'error') {
+            voiceErrorToast.textContent = message;
+            voiceErrorToast.className = 'voice-error-toast visible' + (type === 'info' ? ' info' : '');
+            setTimeout(() => {
+                voiceErrorToast.classList.remove('visible');
+            }, 3000);
+        }
 
         // Initialize Voice
         function initVoice() {
             // Speech Synthesis
             if ('speechSynthesis' in window) {
                 console.log('Speech synthesis available');
+                // Test if speech actually works
+                const testUtterance = new SpeechSynthesisUtterance('test');
+                testUtterance.volume = 0;
+                speechSynth.speak(testUtterance);
+                speechSynth.cancel();
+            } else {
+                console.log('Speech synthesis not available');
+                speechAvailable = false;
+                voiceAvailable = false;
+                showToast('语音合成不可用，将使用文本输入模式', 'info');
             }
 
             // Speech Recognition
@@ -1379,19 +1534,19 @@
                 recognition = new SpeechRecognition();
                 recognition.continuous = false;
                 recognition.interimResults = true;
-                recognition.lang = 'en-US';
+                recognition.lang = currentLang === 'cn' ? 'zh-CN' : 'en-US';
 
                 recognition.onstart = () => {
                     isListening = true;
                     voiceStatus.classList.add('visible', 'listening');
-                    voiceStatusText.textContent = 'Listening...';
+                    voiceStatusText.textContent = currentLang === 'cn' ? '聆听中...' : 'Listening...';
                     listenIndicator.classList.add('visible');
                     speakBtn.classList.add('active');
                     speakBtn.innerHTML = `
                         <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/>
                         </svg>
-                        SPEAKING...
+                        ${currentLang === 'cn' ? '说话中...' : 'SPEAKING...'}
                     `;
                 };
 
@@ -1407,14 +1562,14 @@
                 recognition.onend = () => {
                     isListening = false;
                     voiceStatus.classList.remove('listening');
-                    voiceStatusText.textContent = 'Voice Ready';
+                    voiceStatusText.textContent = currentLang === 'cn' ? '语音就绪' : 'Voice Ready';
                     listenIndicator.classList.remove('visible');
                     speakBtn.classList.remove('active');
                     speakBtn.innerHTML = `
                         <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                         </svg>
-                        READ QUESTION
+                        ${currentLang === 'cn' ? '读出问题' : 'READ QUESTION'}
                     `;
                     
                     if (answerInput.value.trim()) {
@@ -1428,33 +1583,78 @@
                     voiceStatus.classList.remove('listening');
                     listenIndicator.classList.remove('visible');
                     speakBtn.classList.remove('active');
+                    
+                    // Handle specific errors
+                    let errorMsg = '';
+                    switch(event.error) {
+                        case 'not-allowed':
+                            errorMsg = currentLang === 'cn' ? '麦克风权限被拒绝，请在浏览器设置中允许' : 'Microphone access denied. Please allow in browser settings.';
+                            recognitionAvailable = false;
+                            break;
+                        case 'no-speech':
+                            errorMsg = currentLang === 'cn' ? '未检测到语音，请重试或使用文本输入' : 'No speech detected. Please try again or use text input.';
+                            break;
+                        case 'network':
+                            errorMsg = currentLang === 'cn' ? '网络错误，语音识别不可用' : 'Network error. Speech recognition unavailable.';
+                            recognitionAvailable = false;
+                            break;
+                        case 'audio-capture':
+                            errorMsg = currentLang === 'cn' ? '找不到麦克风设备' : 'No microphone found.';
+                            recognitionAvailable = false;
+                            break;
+                        default:
+                            errorMsg = currentLang === 'cn' ? '语音识别出错，将使用文本输入' : 'Speech recognition error. Using text input.';
+                    }
+                    
+                    showToast(errorMsg);
+                    
+                    // Update speak button to show text fallback
+                    speakBtn.innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                        ${currentLang === 'cn' ? '读出问题' : 'READ QUESTION'}
+                    `;
                 };
+            } else {
+                console.log('Speech recognition not available');
+                recognitionAvailable = false;
+                showToast(currentLang === 'cn' ? '语音识别不可用，将使用文本输入模式' : 'Speech recognition unavailable. Using text input mode.', 'info');
+            }
+            
+            // Update voice status
+            if (!speechAvailable && !recognitionAvailable) {
+                voiceAvailable = false;
+                document.querySelector('.card').classList.add('voice-unavailable');
             }
         }
 
         // Speak Question
         function speakQuestion() {
-            if (!speechSynth) {
-                alert('Speech synthesis not supported');
+            if (!speechSynth || !speechAvailable) {
+                showToast(currentLang === 'cn' ? '语音合成不可用，请使用文本输入' : 'Speech synthesis unavailable. Please use text input.', 'info');
                 return;
             }
 
             const q = questions[currentQuestion];
+            const textToSpeak = currentLang === 'cn' ? q.textCn : q.text;
             
             // Cancel any ongoing speech
             speechSynth.cancel();
 
-            currentUtterance = new SpeechSynthesisUtterance(q.text);
+            currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
             currentUtterance.rate = 0.85;
             currentUtterance.pitch = 0.9;
             currentUtterance.volume = 1;
+            currentUtterance.lang = currentLang === 'cn' ? 'zh-CN' : 'en-US';
 
             // Try to find a suitable voice
             const voices = speechSynth.getVoices();
+            const targetLang = currentLang === 'cn' ? 'zh' : 'en';
             const preferredVoice = voices.find(v => 
+                v.lang.startsWith(targetLang) ||
                 v.name.includes('Google') || 
-                v.name.includes('Microsoft') ||
-                v.lang.startsWith('en')
+                v.name.includes('Microsoft')
             );
             if (preferredVoice) {
                 currentUtterance.voice = preferredVoice;
@@ -1464,7 +1664,7 @@
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3 9v6h4l5 5V4L7 9H3z"/>
                 </svg>
-                SPEAKING...
+                ${currentLang === 'cn' ? '播放中...' : 'SPEAKING...'}
             `;
 
             currentUtterance.onend = () => {
@@ -1472,9 +1672,24 @@
                     <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                     </svg>
-                    START LISTENING
+                    ${currentLang === 'cn' ? '开始聆听' : 'START LISTENING'}
                 `;
-                startListening();
+                if (recognitionAvailable) {
+                    startListening();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                speakBtn.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                    ${currentLang === 'cn' ? '读出问题' : 'READ QUESTION'}
+                `;
+                // Auto-fallback to listening if speech fails
+                if (recognitionAvailable) {
+                    startListening();
+                }
             };
 
             speechSynth.speak(currentUtterance);
@@ -1537,7 +1752,7 @@
 
             document.getElementById('progress-fill').style.width = progress + '%';
             document.getElementById('progress-text').textContent = 
-                `Question ${currentQuestion + 1} of ${total}`;
+                currentLang === 'cn' ? `第 ${currentQuestion + 1} 题，共 ${total} 题` : `Question ${currentQuestion + 1} of ${total}`;
             document.getElementById('test-type-label').textContent = q.type;
             
             const questionType = document.getElementById('question-type');
@@ -1545,8 +1760,11 @@
             questionType.className = 'question-type ' + (q.type === 'VK TEST' ? 'vk' : '');
             
             document.getElementById('question-number').textContent = 
-                `QUESTION ${currentQuestion + 1}`;
-            document.getElementById('question-text').textContent = q.text;
+                currentLang === 'cn' ? `第 ${currentQuestion + 1} 题` : `QUESTION ${currentQuestion + 1}`;
+            
+            // Display question text based on language
+            const questionText = currentLang === 'cn' ? q.textCn : q.text;
+            document.getElementById('question-text').textContent = questionText;
 
             // Reset input
             answerInput.value = answers[currentQuestion] || '';
@@ -1555,16 +1773,20 @@
 
             // Update navigation
             document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('prev-btn').textContent = currentLang === 'cn' ? '上一题' : 'PREV';
             document.getElementById('next-btn').disabled = !answers[currentQuestion];
             document.getElementById('next-btn').textContent = 
-                currentQuestion === total - 1 ? 'FINISH' : 'NEXT';
+                currentQuestion === total - 1 ? (currentLang === 'cn' ? '完成' : 'FINISH') : (currentLang === 'cn' ? '下一题' : 'NEXT');
+
+            // Update text input placeholder
+            answerInput.placeholder = currentLang === 'cn' ? '说出你的回答或在此输入...' : 'Speak your answer or type it here...';
 
             // Reset speak button
             speakBtn.innerHTML = `
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
-                READ QUESTION
+                ${currentLang === 'cn' ? '读出问题' : 'READ QUESTION'}
             `;
 
             // Cancel any ongoing speech
@@ -1661,48 +1883,73 @@
             let resultText = '';
             if (results.total >= 70) {
                 classification.classList.add('human');
-                title.textContent = 'CLASSIFICATION: HUMAN';
-                resultText = 'Your responses indicate strong emotional resonance and authentic empathic capacity. The test subject demonstrates genuine human neural-emotional architecture with complex moral reasoning patterns.';
+                title.textContent = currentLang === 'cn' ? '分类结果：人类' : 'CLASSIFICATION: HUMAN';
+                resultText = currentLang === 'cn' 
+                    ? '您的回答表明具有强烈的情感共鸣和真实的共情能力。测试对象展现出真正的人类神经情感架构和复杂的道德推理模式。'
+                    : 'Your responses indicate strong emotional resonance and authentic empathic capacity. The test subject demonstrates genuine human neural-emotional architecture with complex moral reasoning patterns.';
             } else if (results.total >= 40) {
                 classification.classList.add('uncertain');
-                title.textContent = 'CLASSIFICATION: UNCERTAIN';
-                resultText = 'Results are inconclusive. Further evaluation required. The subject displays partial empathic responses but exhibits atypical emotional processing patterns that warrant additional analysis.';
+                title.textContent = currentLang === 'cn' ? '分类结果：不确定' : 'CLASSIFICATION: UNCERTAIN';
+                resultText = currentLang === 'cn'
+                    ? '结果不确定。需要进一步评估。测试对象表现出部分共情反应，但呈现出需要进一步分析的非典型情感处理模式。'
+                    : 'Results are inconclusive. Further evaluation required. The subject displays partial empathic responses but exhibits atypical emotional processing patterns that warrant additional analysis.';
             } else {
                 classification.classList.add('replicant');
-                title.textContent = 'CLASSIFICATION: REPLICANT';
-                resultText = 'The test subject demonstrates reduced empathic responses and atypical moral reasoning patterns. Results are consistent with synthetic bioengineering designed to simulate human emotional responses.';
+                title.textContent = currentLang === 'cn' ? '分类结果：复制人' : 'CLASSIFICATION: REPLICANT';
+                resultText = currentLang === 'cn'
+                    ? '测试对象表现出减弱的共情反应和非典型的道德推理模式。结果与设计用于模拟人类情感反应的合成生物工程一致。'
+                    : 'The test subject demonstrates reduced empathic responses and atypical moral reasoning patterns. Results are consistent with synthetic bioengineering designed to simulate human emotional responses.';
             }
             text.textContent = resultText;
+
+            // Update metrics labels
+            const metricLabels = document.querySelectorAll('.metric-label');
+            const labels = currentLang === 'cn' 
+                ? ['VK 共情指数', '基线反应', '回答数', '平均词数/回答']
+                : ['VK Empathy Index', 'Baseline Response', 'Responses', 'Avg Words/Answer'];
+            metricLabels.forEach((label, i) => {
+                label.textContent = labels[i];
+            });
 
             // Metrics
             document.getElementById('metrics').innerHTML = `
                 <div class="metric">
                     <div class="metric-value">${results.vkScore}%</div>
-                    <div class="metric-label">VK Empathy Index</div>
+                    <div class="metric-label">${labels[0]}</div>
                 </div>
                 <div class="metric">
                     <div class="metric-value">${results.baselineScore}%</div>
-                    <div class="metric-label">Baseline Response</div>
+                    <div class="metric-label">${labels[1]}</div>
                 </div>
                 <div class="metric">
                     <div class="metric-value">${answers.length}</div>
-                    <div class="metric-label">Responses</div>
+                    <div class="metric-label">${labels[2]}</div>
                 </div>
                 <div class="metric">
                     <div class="metric-value">${Math.round(answers.join(' ').split(' ').length / answers.length)}</div>
-                    <div class="metric-label">Avg Words/Answer</div>
+                    <div class="metric-label">${labels[3]}</div>
                 </div>
             `;
+
+            // Update review section header
+            document.querySelector('.answer-review h4').textContent = currentLang === 'cn' ? '回答分析' : 'RESPONSE ANALYSIS';
 
             // Answer Review
             const reviewContainer = document.getElementById('reviewContainer');
             reviewContainer.innerHTML = questions.map((q, i) => `
                 <div class="review-item">
                     <div class="q-num">${q.type} • ${q.category.toUpperCase()}</div>
-                    <div class="q-text">${q.text}</div>
-                    <div class="a-text">${answers[i] || '(No response)'}</div>
+                    <div class="q-text">${currentLang === 'cn' ? q.textCn : q.text}</div>
+                    <div class="a-text">${answers[i] || (currentLang === 'cn' ? '（无回答）' : '(No response)')}</div>
                 </div>
             `).join('');
+
+            // Update retake button
+            document.querySelector('.retake-btn').textContent = currentLang === 'cn' ? '重新测试' : 'RETAKE TEST';
+
+            // Update results header
+            document.querySelector('.results-header h2').textContent = currentLang === 'cn' ? '测试完成' : 'TEST COMPLETE';
+            document.querySelector('.score-label').textContent = currentLang === 'cn' ? '共情指数得分' : 'EMPATHY INDEX SCORE';
         }
 
         // Initialize Voice and Start
@@ -1710,29 +1957,29 @@
             initVoice();
             
             // Load voices
-            if (speechSynth.onvoiceschanged !== undefined) {
+            if (speechSynth && speechSynth.onvoiceschanged !== undefined) {
                 speechSynth.onvoiceschanged = () => {
                     document.getElementById('start-screen').classList.remove('active');
                     document.getElementById('question-screen').classList.add('active');
                     loadQuestion();
                 };
+            } else {
+                // Fallback if voices don't load
+                setTimeout(() => {
+                    if (document.getElementById('start-screen').classList.contains('active')) {
+                        document.getElementById('start-screen').classList.remove('active');
+                        document.getElementById('question-screen').classList.add('active');
+                        loadQuestion();
+                    }
+                }, 1000);
             }
-
-            // Timeout fallback
-            setTimeout(() => {
-                if (document.getElementById('start-screen').classList.contains('active')) {
-                    document.getElementById('start-screen').classList.remove('active');
-                    document.getElementById('question-screen').classList.add('active');
-                    loadQuestion();
-                }
-            }, 1000);
         }
 
         // Retake Test
         function retakeTest() {
             currentQuestion = 0;
             answers = [];
-            speechSynth.cancel();
+            if (speechSynth) speechSynth.cancel();
             
             document.getElementById('results-screen').classList.remove('active');
             document.getElementById('start-screen').classList.add('active');
