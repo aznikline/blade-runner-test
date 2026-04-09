@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voight-Kampff Voice Test | Blade Runner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff00ff;
+            --neon-pink: #ff3366;
+            --neon-yellow: #ffff00;
+            --dark-bg: #0a0a0f;
+            --dark-card: #12121a;
+            --dark-border: #1a1a2e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --glow-cyan: 0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 30px #00f0ff;
+            --glow-magenta: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* CRT Effects */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .crt-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+        }
+
+        .crt-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 51, 102, 0.05) 0%, transparent 70%),
+                var(--dark-bg);
+            animation: bgPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            animation: scanlineMove 10s linear infinite;
+        }
+
+        @keyframes scanlineMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid var(--dark-border);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-magenta), transparent);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 6px;
+            animation: glow 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.8)); }
+            to { filter: drop-shadow(0 0 25px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            letter-spacing: 3px;
+        }
+
+        /* Voice Status Indicator */
+        .voice-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: rgba(18, 18, 26, 0.9);
+            border: 1px solid var(--dark-border);
+            border-radius: 25px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .voice-status.visible {
+            opacity: 1;
+        }
+
+        .voice-status .mic-icon {
+            width: 20px;
+            height: 20px;
+            position: relative;
+        }
+
+        .voice-status .mic-icon::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 18px;
+            background: var(--neon-cyan);
+            border-radius: 6px 6px 3px 3px;
+            top: 0;
+            left: 4px;
+        }
+
+        .voice-status .mic-icon::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 8px;
+            border: 2px solid var(--neon-cyan);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            top: 18px;
+            left: 0;
+        }
+
+        .voice-status.listening .mic-icon::before,
+        .voice-status.listening .mic-icon::after {
+            background: var(--neon-pink);
+            border-color: var(--neon-pink);
+            animation: micPulse 1s ease-in-out infinite;
+        }
+
+        .voice-status.listening {
+            border-color: var(--neon-pink);
+            box-shadow: var(--glow-cyan);
+        }
+
+        @keyframes micPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .voice-status span {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--dark-border);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 12px;
+            height: 12px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: var(--glow-cyan);
+            animation: progressGlow 1s ease-in-out infinite;
+        }
+
+        @keyframes progressGlow {
+            0%, 100% { box-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan); }
+            50% { box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-pink));
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Start Screen */
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen .intro {
+            margin-bottom: 40px;
+        }
+
+        .start-screen h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--neon-cyan);
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        .start-screen p {
+            color: var(--text-secondary);
+            line-height: 2;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .machine-visual {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .pupil-monitor {
+            width: 100px;
+            height: 60px;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pupil {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 30% 30%, #333, #000);
+            border-radius: 50%;
+            animation: pupilReact 3s ease-in-out infinite;
+        }
+
+        @keyframes pupilReact {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.5); }
+            70% { transform: scale(0.8); }
+        }
+
+        .heartbeat-line {
+            flex: 1;
+            height: 60px;
+            border: 1px solid var(--neon-magenta);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .heartbeat-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 200%;
+            height: 2px;
+            background: var(--neon-magenta);
+            animation: heartbeat 1.5s linear infinite;
+            transform: translateY(-50%);
+        }
+
+        @keyframes heartbeat {
+            0% { transform: translateY(-50%) translateX(0); }
+            100% { transform: translateY(-50%) translateX(50%); }
+        }
+
+        .voice-setup {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .voice-setup h3 {
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .voice-setup p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .voice-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 40px;
+        }
+
+        .waveform-bar {
+            width: 4px;
+            background: var(--neon-cyan);
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .waveform-bar:nth-child(1) { animation-delay: 0s; }
+        .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+        .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+        .waveform-bar:nth-child(6) { animation-delay: 0.5s; }
+        .waveform-bar:nth-child(7) { animation-delay: 0.6s; }
+
+        @keyframes wave {
+            0%, 100% { height: 10px; }
+            50% { height: 40px; }
+        }
+
+        .start-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            padding: 18px 60px;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            cursor: pointer;
+            letter-spacing: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .start-btn:hover::before {
+            left: 100%;
+        }
+
+        .start-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: var(--glow-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Question Screen */
+        .question-card {
+            position: relative;
+        }
+
+        .question-type {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 6px 16px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid var(--neon-magenta);
+            color: var(--neon-magenta);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .question-type.vk {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        .question-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--neon-yellow);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .question-text {
+            font-family: 'Special Elite', cursive;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Voice Controls */
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .speak-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .speak-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .speak-btn.active {
+            background: rgba(255, 51, 102, 0.2);
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            animation: speakingPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes speakingPulse {
+            0%, 100% { box-shadow: 0 0 5px var(--neon-pink); }
+            50% { box-shadow: 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink); }
+        }
+
+        .speak-btn .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .listen-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--neon-pink);
+            border-radius: 20px;
+            color: var(--neon-pink);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .listen-indicator.visible {
+            opacity: 1;
+        }
+
+        .listen-indicator .dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .listen-indicator .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--neon-pink);
+            border-radius: 50%;
+            animation: dotBounce 0.6s ease-in-out infinite;
+        }
+
+        .listen-indicator .dot:nth-child(2) { animation-delay: 0.1s; }
+        .listen-indicator .dot:nth-child(3) { animation-delay: 0.2s; }
+
+        @keyframes dotBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Answer Display */
+        .answer-display {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 3px solid var(--neon-cyan);
+            border-radius: 0 8px 8px 0;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
+        }
+
+        .answer-display.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .answer-display .label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .answer-display .text {
+            font-family: 'Special Elite', cursive;
+            font-size: 1.1rem;
+            color: var(--neon-cyan);
+            line-height: 1.6;
+        }
+
+        /* Skip Text Input */
+        .text-input-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--dark-border);
+            border-radius: 8px;
+        }
+
+        .text-input-section .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .text-input-section textarea {
+            width: 100%;
+            padding: 15px;
+            background: var(--dark-bg);
+            border: 1px solid var(--dark-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            resize: none;
+            height: 80px;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-input-section textarea:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+        }
+
+        .text-input-section textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 15px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .nav-btn.prev {
+            background: transparent;
+            border: 1px solid var(--dark-border);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn.prev:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+
+        .nav-btn.next {
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            border: none;
+            color: var(--dark-bg);
+            font-weight: bold;
+        }
+
+        .nav-btn.next:hover {
+            box-shadow: var(--glow-cyan);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Results Screen */
+        .results-screen {
+            text-align: center;
+        }
+
+        .results-header {
+            margin-bottom: 40px;
+        }
+
+        .results-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .score-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 30px 0;
+            animation: scoreGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes scoreGlow {
+            from { filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .score-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+        }
+
+        .classification {
+            padding: 40px;
+            background: var(--dark-bg);
+            border: 3px solid var(--dark-border);
+            border-radius: 15px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .classification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .classification.human::before { background: var(--neon-cyan); }
+        .classification.uncertain::before { background: var(--neon-magenta); }
+        .classification.replicant::before { background: var(--neon-pink); }
+
+        .classification h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+        }
+
+        .classification.human h3 { color: var(--neon-cyan); }
+        .classification.uncertain h3 { color: var(--neon-magenta); }
+        .classification.replicant h3 { color: var(--neon-pink); }
+
+        .classification p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .metric {
+            padding: 20px;
+            background: var(--dark-bg);
+            border: 1px solid var(--dark-border);
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric:hover {
+            border-color: var(--neon-cyan);
+            transform: translateY(-3px);
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--neon-cyan);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Answer Review */
+        .answer-review {
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .answer-review h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .review-item {
+            padding: 15px;
+            background: var(--dark-bg);
+            border-left: 2px solid var(--dark-border);
+            margin-bottom: 15px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .review-item .q-num {
+            font-size: 0.7rem;
+            color: var(--neon-magenta);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .review-item .q-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .review-item .a-text {
+            font-family: 'Special Elite', cursive;
+            font-size: 0.95rem;
+            color: var(--neon-cyan);
+            padding-top: 8px;
+            border-top: 1px solid var(--dark-border);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding: 40px 0 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            animation: glitch-1 2s infinite linear alternate-reverse;
+            clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+            background: linear-gradient(90deg, var(--neon-cyan), transparent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glitch::after {
+            animation: glitch-2 3s infinite linear alternate-reverse;
+            clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+            background: linear-gradient(90deg, var(--neon-magenta), transparent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-1px, 1px); }
+            80% { transform: translate(1px, -1px); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(2px, -2px); }
+            40% { transform: translate(-2px, 2px); }
+            60% { transform: translate(1px, -1px); }
+            80% { transform: translate(-1px, 1px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .logo { font-size: 1.5rem; letter-spacing: 3px; }
+            .card { padding: 25px; }
+            .question-text { font-size: 1.2rem; }
+            .score-display { font-size: 3.5rem; }
+            .nav-buttons { flex-direction: column; }
+            .voice-status { 
+                top: 10px; 
+                right: 10px; 
+                padding: 8px 12px;
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="scanline"></div>
+    <div class="crt-overlay"></div>
+
+    <!-- Voice Status Indicator -->
+    <div class="voice-status" id="voiceStatus">
+        <div class="mic-icon"></div>
+        <span id="voiceStatusText">Voice Ready</span>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="logo glitch" data-text="VOIGHT-KAMPFF">VOIGHT-KAMPFF</h1>
+            <p class="subtitle">VOICE-ENABLED EMPATHY TEST PROTOCOL v3.0</p>
+        </header>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="card start-screen">
+                <div class="intro">
+                    <h2>TEST PROTOCOL INITIALIZATION</h2>
+                    <p>
+                        This instrument measures your emotional response to hypothetical scenarios.
+                        Your responses will be monitored through voice analysis, including tone,
+                        hesitation patterns, and emotional resonance.
+                    </p>
+                    <p>
+                        <strong style="color: var(--neon-cyan);">This is not a test of intelligence or moral character.</strong>
+                    </p>
+                </div>
+
+                <div class="machine-visual">
+                    <div class="pupil-monitor">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="heartbeat-line"></div>
+                </div>
+
+                <div class="voice-setup">
+                    <h3>VOICE INTERFACE CALIBRATION</h3>
+                    <p>
+                        This test uses voice interaction. Each question will be read aloud,
+                        and your spoken responses will be analyzed for emotional content.
+                    </p>
+                    
+                    <div class="voice-preview">
+                        <div class="waveform">
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                        </div>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                            Voice synthesis active
+                        </span>
+                    </div>
+
+                    <button class="start-btn" id="startBtn" onclick="initVoiceAndStart()">
+                        BEGIN VOICE TEST
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="question-screen" class="screen">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-text">Question 1 of 22</span>
+                    <span id="test-type-label">VK TEST</span>
+                </div>
+            </div>
+
+            <div class="card question-card">
+                <div class="question-type vk" id="question-type">VK TEST</div>
+                <div class="question-number" id="question-number">QUESTION 1</div>
+                <div class="question-text" id="question-text"></div>
+
+                <div class="voice-controls">
+                    <button class="speak-btn" id="speakBtn" onclick="speakQuestion()">
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                        READ QUESTION
+                    </button>
+                    <div class="listen-indicator" id="listenIndicator">
+                        <div class="dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <span>Listening...</span>
+                    </div>
+                </div>
+
+                <div class="answer-display" id="answerDisplay">
+                    <div class="label">Your Response</div>
+                    <div class="text" id="answerText"></div>
+                </div>
+
+                <div class="text-input-section">
+                    <div class="label">Or type your response</div>
+                    <textarea 
+                        id="answerInput" 
+                        placeholder="Speak your answer or type it here..."
+                        oninput="onAnswerInput()"
+                    ></textarea>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="nav-btn prev" id="prev-btn" onclick="prevQuestion()" disabled>
+                        PREV
+                    </button>
+                    <button class="nav-btn next" id="next-btn" onclick="nextQuestion()" disabled>
+                        NEXT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <div class="card results-screen">
+                <div class="results-header">
+                    <h2>TEST COMPLETE</h2>
+                    <p class="score-label">EMPATHY INDEX SCORE</p>
+                    <div class="score-display" id="score-display">0%</div>
+                </div>
+
+                <div class="classification" id="classification">
+                    <h3 id="classification-title">ANALYZING...</h3>
+                    <p id="classification-text"></p>
+                </div>
+
+                <div class="metrics" id="metrics"></div>
+
+                <div class="answer-review" id="answerReview">
+                    <h4>RESPONSE ANALYSIS</h4>
+                    <div id="reviewContainer"></div>
+                </div>
+
+                <button class="start-btn retake-btn" onclick="retakeTest()">RETAKE TEST</button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>WALLACE CORPORATION | REPLICANT DETECTION DIVISION</p>
+            <p>ESTABLISHMENT 12 | TYRELL CORPORATION ASSETS</p>
+        </footer>
+    </div>
+
+    <script>
+        // Extended Question Bank - 22 Questions
+        const questions = [
+            // Section A: Classic VK Test (Empathy Questions)
+            {
+                type: "VK TEST",
+                text: "Describe in single words only the good things that come into your mind about your mother.",
+                category: "emotional_memory"
+            },
+            {
+                type: "VK TEST",
+                text: "You have a little boy. He shows you his butterfly collection plus the killing jar. What do you say?",
+                category: "emotional_response"
+            },
+            {
+                type: "VK TEST",
+                text: "A middle-aged man has an眼角 come to rest. It's a very painful thing to watch. What do you do?",
+                category: "empathy_action"
+            },
+            {
+                type: "VK TEST",
+                text: "You're watching a stage play. A beautiful woman comes out and starts to cry. What is the cause?",
+                category: "emotional_reasoning"
+            },
+            {
+                type: "VK TEST",
+                text: "A desert. Beautiful, empty. You're very thirsty. You find a bottle of water. What do you do?",
+                category: "ethical_decision"
+            },
+            {
+                type: "VK TEST",
+                text: "Your best friend is dying. He's in terrible pain. You could end it quickly. What do you do?",
+                category: "moral_dilemma"
+            },
+            {
+                type: "VK TEST",
+                text: "An envelope falls through your mail slot. Inside is a photo of someone you love. What do you feel?",
+                category: "emotional_response"
+            },
+            // Section B: Baseline Test (Emotional Trigger Words)
+            {
+                type: "BASELINE",
+                text: "A woman at a diner starts crying quietly into her coffee. Do you approach her?",
+                category: "social_response"
+            },
+            {
+                type: "BASELINE",
+                text: "You find a wallet with $1000 inside, no identification. What do you do?",
+                category: "moral_action"
+            },
+            {
+                type: "BASELINE",
+                text: "A child is lost and crying in a store. No parents in sight. What do you do?",
+                category: "protective_instinct"
+            },
+            {
+                type: "BASELINE",
+                text: "You witness someone being bullied. No one else intervenes. What do you do?",
+                category: "courage_ethics"
+            },
+            {
+                type: "BASELINE",
+                text: "Your partner says 'I'm fine' but clearly isn't. How do you respond?",
+                category: "emotional_perception"
+            },
+            // Section C: Deep Empathy Questions
+            {
+                type: "VK TEST",
+                text: "Your mother made your least favorite dish. She's proud of it and watching you expectantly. What do you do?",
+                category: "social_honesty"
+            },
+            {
+                type: "VK TEST",
+                text: "You see a bird with a broken wing. It's suffering. What would you do?",
+                category: "compassion_action"
+            },
+            {
+                type: "VK TEST",
+                text: "Describe a moment when you felt truly understood by another person.",
+                category: "emotional_memory"
+            },
+            {
+                type: "VK TEST",
+                text: "The person you暗恋 has just gotten engaged to someone else. What do you feel?",
+                category: "emotional_honesty"
+            },
+            // Section D: Self-Reflection Questions
+            {
+                type: "BASELINE",
+                text: "When was the last time you cried? What triggered it?",
+                category: "emotional_awareness"
+            },
+            {
+                type: "BASELINE",
+                text: "If you could erase one painful memory, would you? Why or why not?",
+                category: "identity_attachment"
+            },
+            {
+                type: "BASELINE",
+                text: "A stranger on the street tells you they haven't eaten in days. You have $10. What do you do?",
+                category: "empathy_action"
+            },
+            {
+                type: "BASELINE",
+                text: "You're told a colleague is spreading false rumors about you. How do you react?",
+                category: "emotional_management"
+            },
+            // Section E: Final Assessment
+            {
+                type: "VK TEST",
+                text: "Use one word to describe how you feel about the concept of 'home'.",
+                category: "core_identity"
+            },
+            {
+                type: "VK TEST",
+                text: "If you could go back and change one moment in your life, what would it be and why?",
+                category: "regret_attachment"
+            }
+        ];
+
+        // State
+        let currentQuestion = 0;
+        let answers = [];
+        let speechSynth = window.speechSynthesis;
+        let recognition = null;
+        let isListening = false;
+        let currentUtterance = null;
+
+        // DOM Elements
+        const voiceStatus = document.getElementById('voiceStatus');
+        const voiceStatusText = document.getElementById('voiceStatusText');
+        const speakBtn = document.getElementById('speakBtn');
+        const listenIndicator = document.getElementById('listenIndicator');
+        const answerDisplay = document.getElementById('answerDisplay');
+        const answerText = document.getElementById('answerText');
+        const answerInput = document.getElementById('answerInput');
+
+        // Initialize Voice
+        function initVoice() {
+            // Speech Synthesis
+            if ('speechSynthesis' in window) {
+                console.log('Speech synthesis available');
+            }
+
+            // Speech Recognition
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    voiceStatus.classList.add('visible', 'listening');
+                    voiceStatusText.textContent = 'Listening...';
+                    listenIndicator.classList.add('visible');
+                    speakBtn.classList.add('active');
+                    speakBtn.innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/>
+                        </svg>
+                        SPEAKING...
+                    `;
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0].transcript)
+                        .join('');
+                    
+                    answerInput.value = transcript;
+                    onAnswerInput();
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    voiceStatus.classList.remove('listening');
+                    voiceStatusText.textContent = 'Voice Ready';
+                    listenIndicator.classList.remove('visible');
+                    speakBtn.classList.remove('active');
+                    speakBtn.innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                        READ QUESTION
+                    `;
+                    
+                    if (answerInput.value.trim()) {
+                        submitAnswer();
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.log('Speech recognition error:', event.error);
+                    isListening = false;
+                    voiceStatus.classList.remove('listening');
+                    listenIndicator.classList.remove('visible');
+                    speakBtn.classList.remove('active');
+                };
+            }
+        }
+
+        // Speak Question
+        function speakQuestion() {
+            if (!speechSynth) {
+                alert('Speech synthesis not supported');
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            
+            // Cancel any ongoing speech
+            speechSynth.cancel();
+
+            currentUtterance = new SpeechSynthesisUtterance(q.text);
+            currentUtterance.rate = 0.85;
+            currentUtterance.pitch = 0.9;
+            currentUtterance.volume = 1;
+
+            // Try to find a suitable voice
+            const voices = speechSynth.getVoices();
+            const preferredVoice = voices.find(v => 
+                v.name.includes('Google') || 
+                v.name.includes('Microsoft') ||
+                v.lang.startsWith('en')
+            );
+            if (preferredVoice) {
+                currentUtterance.voice = preferredVoice;
+            }
+
+            speakBtn.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+                </svg>
+                SPEAKING...
+            `;
+
+            currentUtterance.onend = () => {
+                speakBtn.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    </svg>
+                    START LISTENING
+                `;
+                startListening();
+            };
+
+            speechSynth.speak(currentUtterance);
+        }
+
+        // Start Listening
+        function startListening() {
+            if (recognition) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.log('Recognition already started');
+                }
+            }
+        }
+
+        // Handle Answer Input
+        function onAnswerInput() {
+            const hasAnswer = answerInput.value.trim().length > 0;
+            document.getElementById('next-btn').disabled = !hasAnswer;
+        }
+
+        // Submit Answer
+        function submitAnswer() {
+            const text = answerInput.value.trim();
+            if (text) {
+                answers[currentQuestion] = text;
+                answerText.textContent = text;
+                answerDisplay.classList.add('visible');
+            }
+        }
+
+        // Next Question
+        function nextQuestion() {
+            submitAnswer();
+            
+            if (answers[currentQuestion]) {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        }
+
+        // Previous Question
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        // Load Question
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            const total = questions.length;
+            const progress = ((currentQuestion + 1) / total) * 100;
+
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = 
+                `Question ${currentQuestion + 1} of ${total}`;
+            document.getElementById('test-type-label').textContent = q.type;
+            
+            const questionType = document.getElementById('question-type');
+            questionType.textContent = q.type;
+            questionType.className = 'question-type ' + (q.type === 'VK TEST' ? 'vk' : '');
+            
+            document.getElementById('question-number').textContent = 
+                `QUESTION ${currentQuestion + 1}`;
+            document.getElementById('question-text').textContent = q.text;
+
+            // Reset input
+            answerInput.value = answers[currentQuestion] || '';
+            answerText.textContent = answers[currentQuestion] || '';
+            answerDisplay.classList.toggle('visible', !!answers[currentQuestion]);
+
+            // Update navigation
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = !answers[currentQuestion];
+            document.getElementById('next-btn').textContent = 
+                currentQuestion === total - 1 ? 'FINISH' : 'NEXT';
+
+            // Reset speak button
+            speakBtn.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+                READ QUESTION
+            `;
+
+            // Cancel any ongoing speech
+            if (speechSynth) {
+                speechSynth.cancel();
+            }
+        }
+
+        // Calculate Results
+        function calculateResults() {
+            let empathyScore = 0;
+            let emotionalAuthenticity = 0;
+            let socialResonance = 0;
+            let moralComplexity = 0;
+
+            answers.forEach((answer, index) => {
+                const q = questions[index];
+                const text = answer.toLowerCase();
+                
+                // Score based on answer characteristics
+                let score = 50; // Base score
+
+                // Emotional word detection
+                const emotionalWords = [
+                    'feel', 'felt', 'feeling', 'love', 'sad', 'happy', 'cry', 'cried',
+                    'miss', 'missing', 'hurt', 'pain', 'fear', 'afraid', 'hope',
+                    'wish', 'want', 'need', 'care', 'sorry', 'apologize', 'warm',
+                    'heart', 'soul', 'tears', 'emotion', 'gut', 'instinct', 'couldnt',
+                    'wouldnt', 'shouldnt', 'dont know', 'uncertain', 'maybe', 'perhaps'
+                ];
+
+                const hasEmotionalWord = emotionalWords.some(w => text.includes(w));
+                if (hasEmotionalWord) score += 15;
+
+                // Hesitation patterns (short answers suggest less processing)
+                if (text.length < 20) score -= 10;
+                if (text.length > 100) score += 5;
+
+                // Uncertainty markers (humans often express uncertainty)
+                const uncertaintyMarkers = ['maybe', 'perhaps', 'not sure', 'dont know', 'uncertain', 'might', 'could'];
+                const hasUncertainty = uncertaintyMarkers.some(m => text.includes(m));
+                if (hasUncertainty) score += 5;
+
+                // Rationalization patterns (replicants might over-explain)
+                const rationalPatterns = ['because', 'therefore', 'logically', 'rationally', 'optimal', 'efficient'];
+                const hasRational = rationalPatterns.some(p => text.includes(p));
+                if (hasRational) score -= 10;
+
+                // Category-specific scoring
+                if (q.category === 'emotional_memory' && text.length > 50) score += 10;
+                if (q.category === 'moral_dilemma' && (text.includes('dont') || text.includes('couldnt'))) score += 10;
+                if (q.category === 'social_honesty' && (text.includes('pretend') || text.includes('lie'))) score += 10;
+
+                // Clamp score
+                score = Math.max(0, Math.min(100, score));
+
+                // Category breakdown
+                if (q.type === 'VK TEST') {
+                    empathyScore += score;
+                } else {
+                    socialResonance += score;
+                }
+            });
+
+            const totalPossible = questions.length * 100;
+            const totalScore = Math.round(((empathyScore + socialResonance) / questions.length) / 2);
+            
+            const vkAvg = Math.round(empathyScore / questions.filter(q => q.type === 'VK TEST').length);
+            const baselineAvg = Math.round(socialResonance / questions.filter(q => q.type === 'BASELINE').length);
+
+            return {
+                total: totalScore,
+                vkScore: vkAvg,
+                baselineScore: baselineAvg,
+                answers: answers
+            };
+        }
+
+        // Show Results
+        function showResults() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('results-screen').classList.add('active');
+
+            const results = calculateResults();
+            
+            document.getElementById('score-display').textContent = results.total + '%';
+            
+            const classification = document.getElementById('classification');
+            const title = document.getElementById('classification-title');
+            const text = document.getElementById('classification-text');
+
+            classification.className = 'classification';
+
+            let resultText = '';
+            if (results.total >= 70) {
+                classification.classList.add('human');
+                title.textContent = 'CLASSIFICATION: HUMAN';
+                resultText = 'Your responses indicate strong emotional resonance and authentic empathic capacity. The test subject demonstrates genuine human neural-emotional architecture with complex moral reasoning patterns.';
+            } else if (results.total >= 40) {
+                classification.classList.add('uncertain');
+                title.textContent = 'CLASSIFICATION: UNCERTAIN';
+                resultText = 'Results are inconclusive. Further evaluation required. The subject displays partial empathic responses but exhibits atypical emotional processing patterns that warrant additional analysis.';
+            } else {
+                classification.classList.add('replicant');
+                title.textContent = 'CLASSIFICATION: REPLICANT';
+                resultText = 'The test subject demonstrates reduced empathic responses and atypical moral reasoning patterns. Results are consistent with synthetic bioengineering designed to simulate human emotional responses.';
+            }
+            text.textContent = resultText;
+
+            // Metrics
+            document.getElementById('metrics').innerHTML = `
+                <div class="metric">
+                    <div class="metric-value">${results.vkScore}%</div>
+                    <div class="metric-label">VK Empathy Index</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${results.baselineScore}%</div>
+                    <div class="metric-label">Baseline Response</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${answers.length}</div>
+                    <div class="metric-label">Responses</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${Math.round(answers.join(' ').split(' ').length / answers.length)}</div>
+                    <div class="metric-label">Avg Words/Answer</div>
+                </div>
+            `;
+
+            // Answer Review
+            const reviewContainer = document.getElementById('reviewContainer');
+            reviewContainer.innerHTML = questions.map((q, i) => `
+                <div class="review-item">
+                    <div class="q-num">${q.type} • ${q.category.toUpperCase()}</div>
+                    <div class="q-text">${q.text}</div>
+                    <div class="a-text">${answers[i] || '(No response)'}</div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize Voice and Start
+        function initVoiceAndStart() {
+            initVoice();
+            
+            // Load voices
+            if (speechSynth.onvoiceschanged !== undefined) {
+                speechSynth.onvoiceschanged = () => {
+                    document.getElementById('start-screen').classList.remove('active');
+                    document.getElementById('question-screen').classList.add('active');
+                    loadQuestion();
+                };
+            }
+
+            // Timeout fallback
+            setTimeout(() => {
+                if (document.getElementById('start-screen').classList.contains('active')) {
+                    document.getElementById('start-screen').classList.remove('active');
+                    document.getElementById('question-screen').classList.add('active');
+                    loadQuestion();
+                }
+            }, 1000);
+        }
+
+        // Retake Test
+        function retakeTest() {
+            currentQuestion = 0;
+            answers = [];
+            speechSynth.cancel();
+            
+            document.getElementById('results-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.add('active');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('question-screen').classList.contains('active')) {
+                if (e.key === ' ' && !isListening) {
+                    e.preventDefault();
+                    speakQuestion();
+                } else if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
