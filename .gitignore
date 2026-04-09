@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Node (if you add dependencies later)
+node_modules/
+package-lock.json
+
+# Misc
+*.bak
+*.tmp
